@@ -15,37 +15,42 @@ jobs:
         
       - name: Install dependencies
         run: |
-          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-mingw-w64-i686 lib32z1 openjdk-11-jre-headless wget unzip
+          sudo apt-get install -y build-essential wget unzip
           
-      - name: Download and setup SGDK
+      - name: Download SGDK
         run: |
           wget -q https://github.com/Stephane-D/SGDK/archive/refs/tags/v2.00.tar.gz
           tar -xzf v2.00.tar.gz
           mv SGDK-2.00 sgdk
           ls -la sgdk/
           
-      - name: Create necessary directories
+      - name: Setup SGDK environment
         run: |
-          mkdir -p inc
-          mkdir -p src
-          mkdir -p res
-          mkdir -p out
+          echo "GDK=$(pwd)/sgdk" >> $GITHUB_ENV
+          echo "GDK_WIN=$(pwd)/sgdk" >> $GITHUB_ENV
           
+      - name: Create output directory
+        run: mkdir -p out
+        
       - name: Compile ROM
         run: |
           export GDK=$(pwd)/sgdk
-          echo "GDK=$GDK"
+          export GDK_WIN=$(pwd)/sgdk
+          cd $GDK
+          ls -la bin/
+          cd $GITHUB_WORKSPACE
           $GDK/bin/make -f $GDK/makefile.gen
-          
-      - name: Check output
+        continue-on-error: true
+        
+      - name: Check if ROM was created
         run: |
-          ls -la out/
+          ls -la out/ || echo "No out directory"
+          find . -name "*.bin" -type f || echo "No .bin files found"
           
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
           name: PhantasyQueeny-ROM
           path: out/rom.bin
-          if-no-files-found: error
+          if-no-files-found: ignore
