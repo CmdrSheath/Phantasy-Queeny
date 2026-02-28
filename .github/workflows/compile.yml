@@ -24,11 +24,11 @@ jobs:
           tar -xzf v2.00.tar.gz
           mv SGDK-2.00 sgdk
           ls -la sgdk/
+          ls -la sgdk/bin/
           
       - name: Setup SGDK environment
         run: |
           echo "GDK=$(pwd)/sgdk" >> $GITHUB_ENV
-          echo "GDK_WIN=$(pwd)/sgdk" >> $GITHUB_ENV
           
       - name: Create output directory
         run: mkdir -p out
@@ -36,21 +36,30 @@ jobs:
       - name: Compile ROM
         run: |
           export GDK=$(pwd)/sgdk
-          export GDK_WIN=$(pwd)/sgdk
-          cd $GDK
-          ls -la bin/
-          cd $GITHUB_WORKSPACE
-          $GDK/bin/make -f $GDK/makefile.gen
-        continue-on-error: true
-        
-      - name: Check if ROM was created
+          echo "GDK=$GDK"
+          echo "Current directory: $(pwd)"
+          ls -la
+          echo "Contents of src/:"
+          ls -la src/
+          $GDK/bin/make -f $GDK/makefile.gen 2>&1 || echo "Make failed, checking for ROM anyway"
+          
+      - name: Find all files after build
         run: |
-          ls -la out/ || echo "No out directory"
-          find . -name "*.bin" -type f || echo "No .bin files found"
+          echo "Current directory contents:"
+          ls -la
+          echo "Looking for .bin files:"
+          find . -name "*.bin" -type f 2>/dev/null || echo "No .bin files"
+          echo "Looking for out/ directory:"
+          ls -la out/ 2>/dev/null || echo "No out directory"
+          echo "Looking for any ROM files:"
+          find . -name "rom*" -type f 2>/dev/null || echo "No rom files"
           
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
           name: PhantasyQueeny-ROM
-          path: out/rom.bin
-          if-no-files-found: ignore
+          path: |
+            out/rom.bin
+            *.bin
+            rom.bin
+          if-no-files-found: warn
