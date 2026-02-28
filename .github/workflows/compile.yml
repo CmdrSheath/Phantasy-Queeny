@@ -16,50 +16,53 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential wget unzip
+          sudo apt-get install -y build-essential wget unzip openjdk-11-jre-headless
           
-      - name: Download SGDK
+      - name: Download and setup SGDK
         run: |
           wget -q https://github.com/Stephane-D/SGDK/archive/refs/tags/v2.00.tar.gz
           tar -xzf v2.00.tar.gz
           mv SGDK-2.00 sgdk
+          echo "SGDK downloaded, checking structure:"
           ls -la sgdk/
-          ls -la sgdk/bin/
+          echo "Checking for bin directory:"
+          ls -la sgdk/bin/ 2>/dev/null || echo "No bin folder"
+          echo "Checking for make:"
+          find sgdk -name "make*" -type f 2>/dev/null || echo "No make found"
           
-      - name: Setup SGDK environment
-        run: |
-          echo "GDK=$(pwd)/sgdk" >> $GITHUB_ENV
-          
-      - name: Create output directory
-        run: mkdir -p out
-        
-      - name: Compile ROM
+      - name: Setup environment and compile
         run: |
           export GDK=$(pwd)/sgdk
           echo "GDK=$GDK"
-          echo "Current directory: $(pwd)"
-          ls -la
-          echo "Contents of src/:"
-          ls -la src/
-          $GDK/bin/make -f $GDK/makefile.gen 2>&1 || echo "Make failed, checking for ROM anyway"
           
-      - name: Find all files after build
+          # Create necessary directories
+          mkdir -p out
+          
+          # Try to compile using SGDK's makefile
+          if [ -f "$GDK/bin/make" ]; then
+            echo "Found make in bin/"
+            $GDK/bin/make -f $GDK/makefile.gen
+          elif [ -f "$GDK/make" ]; then
+            echo "Found make in root"
+            $GDK/make -f $GDK/makefile.gen
+          else
+            echo "Trying system make with SGDK makefile..."
+            make -f $GDK/makefile.gen
+          fi
+          
+      - name: Find ROM file
         run: |
-          echo "Current directory contents:"
-          ls -la
-          echo "Looking for .bin files:"
-          find . -name "*.bin" -type f 2>/dev/null || echo "No .bin files"
-          echo "Looking for out/ directory:"
+          echo "Looking for ROM files..."
+          find . -name "*.bin" -o -name "*.md" -o -name "*.gen" 2>/dev/null
           ls -la out/ 2>/dev/null || echo "No out directory"
-          echo "Looking for any ROM files:"
-          find . -name "rom*" -type f 2>/dev/null || echo "No rom files"
           
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
           name: PhantasyQueeny-ROM
           path: |
-            out/rom.bin
+            out/*.bin
+            out/*.md
             *.bin
-            rom.bin
+            *.md
           if-no-files-found: warn
