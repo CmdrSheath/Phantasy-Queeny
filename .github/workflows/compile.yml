@@ -8,25 +8,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: 
-      image: ghcr.io/stephane-d/sgdk:latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Compile ROM
+      - name: Build ROM using SGDK Docker
         run: |
-          echo "GDK=/sgdk"
-          export GDK=/sgdk
-          ls -la /sgdk/
-          make -f /sgdk/makefile.gen
+          docker run --rm -v "$PWD:/src" -w /src ghcr.io/stephane-d/sgdk:latest \
+            bash -c "export GDK=/sgdk && make -f /sgdk/makefile.gen"
           
       - name: Find ROM file
         run: |
           echo "Looking for ROM..."
-          ls -la out/
-          find . -name "*.bin" -o -name "*.md" | head -5
+          ls -la out/ 2>/dev/null || echo "No out directory"
+          find . -name "*.bin" -o -name "*.md" 2>/dev/null | head -5
           
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
