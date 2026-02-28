@@ -144,6 +144,36 @@ typedef struct {
     EnemyType enemies[4];// Possible encounters
 } Map;
 
+
+// Directions
+#define DIR_NORTH   0
+#define DIR_SOUTH   1
+#define DIR_EAST    2
+#define DIR_WEST    3
+
+// Items
+#define ITEM_NONE           0
+#define ITEM_WOOD_SWORD     1
+#define ITEM_LEATHER_ARMOR  2
+#define ITEM_CRYSTAL_SHARD  3
+
+// Techniques
+#define TECH_NONE       0
+#define TECH_HEAL       1  // Heroine path - restore HP
+#define TECH_DRAIN      2  // Antagonist path - damage + heal
+#define TECH_NEUTRAL    3  // Balanced path - basic attack boost
+
+// Function prototypes to add:
+void initOverworld(void);
+void updateOverworld(void);
+void cleanupOverworld(void);
+void spawnPortal(u8 tileX, u8 tileY, EnemyType enemy);
+void startCombat(EnemyType type, u8 count);
+void initCombat(void);
+void updateCombat(void);
+void cleanupCombat(void);
+
+
 //==============================================================================
 // GLOBAL VARIABLES (extern - defined in game.c)
 //==============================================================================
