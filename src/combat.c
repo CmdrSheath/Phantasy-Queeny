@@ -4,6 +4,9 @@
 // Sci-fi superhero battles with morality choices
 //==============================================================================
 
+#include <genesis.h>
+#include <string.h>
+#include <stdbool.h>
 #include "game.h"
 
 // Combat UI positions
