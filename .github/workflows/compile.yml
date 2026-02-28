@@ -17,19 +17,31 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-mingw-w64-i686 lib32z1
+          sudo apt-get install -y build-essential gcc-mingw-w64-i686 lib32z1 openjdk-11-jre-headless wget unzip
           
-      - name: Setup SGDK
+      - name: Download and setup SGDK
         run: |
           wget -q https://github.com/Stephane-D/SGDK/archive/refs/tags/v2.00.tar.gz
           tar -xzf v2.00.tar.gz
-          mv SGDK-2.00 SGDK
-          echo "GDK=$(pwd)/SGDK" >> $GITHUB_ENV
+          mv SGDK-2.00 sgdk
+          ls -la sgdk/
+          
+      - name: Create necessary directories
+        run: |
+          mkdir -p inc
+          mkdir -p src
+          mkdir -p res
+          mkdir -p out
           
       - name: Compile ROM
         run: |
-          cd $GITHUB_WORKSPACE
-          make -f $GDK/makefile.gen
+          export GDK=$(pwd)/sgdk
+          echo "GDK=$GDK"
+          $GDK/bin/make -f $GDK/makefile.gen
+          
+      - name: Check output
+        run: |
+          ls -la out/
           
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
