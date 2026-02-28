@@ -15,7 +15,7 @@ jobs:
         
       - name: Build ROM using SGDK Docker
         run: |
-          docker run --rm -v "$PWD:/src" -w /src -e GDK=/sgdk ghcr.io/stephane-d/sgdk:latest make -f /sgdk/makefile.gen
+          docker run --rm --entrypoint "" -v "$PWD:/src" -w /src -e GDK=/sgdk ghcr.io/stephane-d/sgdk:latest /sgdk/bin/make -f /sgdk/makefile.gen
           
       - name: Find ROM file
         run: |
