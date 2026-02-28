@@ -13,9 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Build ROM using SGDK Docker
+      - name: Explore SGDK Docker structure
         run: |
-          docker run --rm --entrypoint "" -v "$PWD:/src" -w /src -e GDK=/sgdk ghcr.io/stephane-d/sgdk:latest /sgdk/bin/make -f /sgdk/makefile.gen
+          docker run --rm -v "$PWD:/src" -w /src ghcr.io/stephane-d/sgdk:latest ls -la /
+          echo "---"
+          docker run --rm -v "$PWD:/src" -w /src ghcr.io/stephane-d/sgdk:latest ls -la /sgdk/ 2>/dev/null || echo "No /sgdk"
+          echo "---"
+          docker run --rm -v "$PWD:/src" -w /src ghcr.io/stephane-d/sgdk:latest which make
+          docker run --rm -v "$PWD:/src" -w /src ghcr.io/stephane-d/sgdk:latest make --version
+          
+      - name: Build ROM
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src -e GDK=/sgdk ghcr.io/stephane-d/sgdk:latest make -f /sgdk/makefile.gen
           
       - name: Find ROM file
         run: |
