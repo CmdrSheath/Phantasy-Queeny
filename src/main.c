@@ -1,83 +1,30 @@
 //==============================================================================
-// PHANTASY QUEENY
-// A Sega Genesis RPG based on the comic series
-// Main entry point and game state manager
+// PHANTASY QUEENY - Sega Genesis RPG
+// Main entry point
 //==============================================================================
 
 #include <genesis.h>
-#include "game.h"
 
-// Game state machine
-GameState currentState;
-GameState previousState;
-
-// System initialization
-void initSystem() {
-    SYS_init();
+// Minimal main for testing compilation
+int main(bool hardReset)
+{
+    // Initialize system
     VDP_setScreenWidth320();
-    VDP_setPlanSize(64, 32);
-    SPR_init();
-    JOY_init();
+    VDP_setBackgroundColor(0);
+    VDP_setPaletteColor(0, 0x0000); // Black background
+    VDP_setPaletteColor(1, 0x0EEE); // White text
     
-    // Initialize random seed
-    setRandomSeed(0xC427); // Comic reference? Change if needed
+    // Simple text display
+    VDP_drawText("PHANTASY QUEENY", 10, 10);
+    VDP_drawText("SYSTEM TEST", 12, 12);
+    VDP_drawText("Press START", 11, 20);
     
-    // Load palette
-    VDP_setPalette(PAL0, palette_all_black);
-}
-
-// State transition
-void changeState(GameState newState) {
-    previousState = currentState;
-    currentState = newState;
-    
-    // Cleanup previous state
-    switch(previousState) {
-        case STATE_TITLE:     cleanupTitle(); break;
-        case STATE_OVERWORLD: cleanupOverworld(); break;
-        case STATE_DUNGEON:   cleanupDungeon(); break;
-        case STATE_COMBAT:    cleanupCombat(); break;
-        case STATE_MENU:      cleanupMenu(); break;
-        case STATE_CUTSCENE:  cleanupCutscene(); break;
-    }
-    
-    // Initialize new state
-    switch(newState) {
-        case STATE_TITLE:     initTitle(); break;
-        case STATE_OVERWORLD: initOverworld(); break;
-        case STATE_DUNGEON:   initDungeon(); break;
-        case STATE_COMBAT:    initCombat(); break;
-        case STATE_MENU:      initMenu(); break;
-        case STATE_CUTSCENE:  initCutscene(); break;
-    }
-}
-
-int main(bool hardReset) {
-    initSystem();
-    
-    // Start with title screen
-    changeState(STATE_TITLE);
-    
-    // Main game loop - 60 FPS
-    while(TRUE) {
-        // Read input
-        joyState = JOY_readJoypad(JOY_1);
-        
-        // Update current state
-        switch(currentState) {
-            case STATE_TITLE:     updateTitle(); break;
-            case STATE_OVERWORLD: updateOverworld(); break;
-            case STATE_DUNGEON:   updateDungeon(); break;
-            case STATE_COMBAT:    updateCombat(); break;
-            case STATE_MENU:      updateMenu(); break;
-            case STATE_CUTSCENE:  updateCutscene(); break;
-        }
-        
-        // Update sprites and VDP
-        SPR_update();
+    // Main loop
+    while(1)
+    {
+        // Wait for vertical blank (60 FPS)
         SYS_doVBlankProcess();
     }
     
     return 0;
 }
-
