@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include "game.h"
 
+// Function prototype
+void changeState(GameState newState);
+
 void initCombat(void) {
     VDP_drawText("COMBAT MODE", 10, 10);
 }
@@ -14,8 +17,8 @@ void updateCombat(void) {
 }
 
 void cleanupCombat(void) {
-    VDP_clearPlan(PLAN_A, TRUE);
-    VDP_clearPlan(PLAN_B, TRUE);
+    VDP_clearPlane(BG_A, TRUE);
+    VDP_clearPlane(BG_B, TRUE);
 }
 
 void startCombat(int enemyType, int count) {
