@@ -6,102 +6,50 @@
 // Sci-fi city exploration with dimensional portals
 //==============================================================================
 
+#include <genesis.h>
+#include <string.h>
+#include <stdbool.h>
 #include "game.h"
 
-// Map constants
-#define METRO_WIDTH     48
-#define METRO_HEIGHT    32
+void initOverworld(void) {
+    VDP_drawText("OVERWORLD", 10, 10);
+}
 
-// Tile types
-#define TILE_FLOOR      0
-#define TILE_WALL       1
-#define TILE_WATER      2
-#define TILE_BUILDING   3
-#define TILE_ROAD       4
-#define TILE_PORTAL     5  // Dimensional rift!
+void updateOverworld(void) {
+    if (JOY_readJoypad(JOY_1) & BUTTON_A) {
+        changeState(STATE_COMBAT);
+    }
+}
 
-// Portal states
-#define PORTAL_CLOSED   0
-#define PORTAL_OPENING  1
-#define PORTAL_ACTIVE   2
+void cleanupOverworld(void) {
+    VDP_clearPlane(BG_A, TRUE);
+    VDP_clearPlane(BG_B, TRUE);
+}
 
-typedef struct {
-    u16 x, y;
-    u8 state;
-    u8 timer;        // Animation frame
-    EnemyType enemy; // What emerges
-    bool triggered;  // Has player seen this?
-} Portal;
+void spawnPortal(u8 tileX, u8 tileY, int enemyType) {
+    // Placeholder
+}
 
-// Metropolis map data (simplified - 48x32)
-// 0=FLOOR, 1=WALL, 2=WATER, 3=BUILDING, 4=ROAD, 5=PORTAL
-const u8 metroMap[METRO_HEIGHT][METRO_WIDTH] = {
-    // Row 0-5: Northern district (industrial)
-    {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3},
-    {3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,3},
-    {3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,4,3},
-    {3,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,4,3},
-    {3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3},
-    {3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,3},
-    
-    // Row 6-10: Central plaza (where Queeny starts)
-    {3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,4,3},
-    {3,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,4,3},
-    {3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3}, // START HERE (row 8, col 22)
-    {3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,3},
-    {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3},
-    
-    // Row 11-15: Eastern tech district (portals appear here)
-    {3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,3},
-    {3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,0,4,3,3,4,0,0,4,3},
-    {3,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,5,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,0,4,4,4,4,0,0,4,3}, // PORTAL at 13,17
-    {3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3},
-    {3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,4,3,3,4,4,4,4,3},
-    
-    // ... (continue pattern for remaining rows)
-    // I'll provide the full map if needed, but this is enough to test
-};
+void checkCollision(void) {
+    // Placeholder
+}
 
-// Active portals in the city
-#define MAX_PORTALS 4
-Portal portals[MAX_PORTALS];
-u8 portalCount = 0;
+void checkEncounters(void) {
+    // Placeholder
+}
 
-// Camera position
-s16 camX = 0, camY = 0;
+void updateCamera(void) {
+    // Placeholder
+}
 
-// Animation frames
-u8 portalAnimTimer = 0;
+void renderMap(void) {
+    // Placeholder
+}
 
-void initOverworld() {
-    // Set Queeny's starting position (Central Plaza)
-    party[0].x = 22 * TILE_SIZE;  // Center of map
-    party[0].y = 8 * TILE_SIZE;
-    party[0].direction = DIR_SOUTH;
-    
-    // Initialize camera
-    camX = party[0].x - SCREEN_WIDTH/2;
-    camY = party[0].y - SCREEN_HEIGHT/2;
-    
-    // Clamp camera to map bounds
-    if (camX < 0) camX = 0;
-    if (camY < 0) camY = 0;
-    if (camX > (METRO_WIDTH * TILE_SIZE) - SCREEN_WIDTH) 
-        camX = (METRO_WIDTH * TILE_SIZE) - SCREEN_WIDTH;
-    if (camY > (METRO_HEIGHT * TILE_SIZE) - SCREEN_HEIGHT) 
-        camY = (METRO_HEIGHT * TILE_SIZE) - SCREEN_HEIGHT;
-    
-    // Setup VDP
-    VDP_setPalette(PAL0, palette_overworld);
-    VDP_setPalette(PAL1, palette_ui);
-    
-    // Load tileset (placeholder - you'll replace with actual art)
-    // VDP_loadTileSet(metro_tileset, 1, DMA);
-    
-    // Draw the visible portion of map
-    updateCamera();
-    renderMap();
-    
+void tryInteract(void) {
+    VDP_drawText("Nothing here...", 10, 20);
+}
+
     // Initialize portals
     memset(portals, 0, sizeof(portals));
     portalCount = 0;
