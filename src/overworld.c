@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include "game.h"
 
+void changeState(GameState newState);
+
 void initOverworld(void) {
     VDP_drawText("OVERWORLD", 10, 10);
 }
@@ -50,58 +52,6 @@ void tryInteract(void) {
     VDP_drawText("Nothing here...", 10, 20);
 }
 
-    // Initialize portals
-    memset(portals, 0, sizeof(portals));
-    portalCount = 0;
-    
-    // Spawn first portal (tutorial encounter)
-    spawnPortal(17, 13, ENEMY_SLASHER); // x=17, y=13
-    
-    // Setup Queeny sprite
-    party[0].sprite = SPR_addSprite(&spr_queeny, 
-        party[0].x - camX, party[0].y - camY, 
-        TILE_ATTR(PAL0, FALSE, FALSE, FALSE));
-    
-    // Display area name
-    showMessage("SECTOR 7 - CENTRAL PLAZA");
-}
-
-void spawnPortal(u8 tileX, u8 tileY, EnemyType enemy) {
-    if (portalCount >= MAX_PORTALS) return;
-    
-    Portal* p = &portals[portalCount++];
-    p->x = tileX * TILE_SIZE + 8;  // Center in tile
-    p->y = tileY * TILE_SIZE + 8;
-    p->state = PORTAL_OPENING;
-    p->timer = 0;
-    p->enemy = enemy;
-    p->triggered = FALSE;
-    
-    // Visual effect: portal appears
-    // We'll add sprite/animation later
-}
-
-void updateOverworld() {
-    u8 speed = 2;  // Walking speed
-    bool moved = FALSE;
-    
-    // D-pad movement
-    if (joyState & BUTTON_UP) {
-        party[0].y -= speed;
-        party[0].direction = DIR_NORTH;
-        moved = TRUE;
-    }
-    else if (joyState & BUTTON_DOWN) {
-        party[0].y += speed;
-        party[0].direction = DIR_SOUTH;
-        moved = TRUE;
-    }
-    
-    if (joyState & BUTTON_LEFT) {
-        party[0].x -= speed;
-        party[0].direction = DIR_WEST;
-        moved = TRUE;
-    }
     else if (joyState & BUTTON_RIGHT) {
         party[0].x += speed;
         party[0].direction = DIR_EAST;
