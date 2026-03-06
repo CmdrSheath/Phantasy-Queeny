@@ -3,7 +3,7 @@
 
 GDK = $(GDK)
 
-SRC = src/main.c src/game.c src/overworld.c src/combat.c src/dungeon.c src/ui.c
+SRC = src/main.c src/game.c src/title.c src/cutscene.c src/overworld.c src/combat.c src/dungeon.c src/ui.c
 RES = res/resources.res
 
 .PHONY: all clean
@@ -13,4 +13,3 @@ all:
 
 clean:
 	$(MAKE) -f $(GDK)/makefile.gen clean
-
