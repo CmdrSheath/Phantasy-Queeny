@@ -15,7 +15,7 @@
 // Map dimensions (in tiles)
 #define MAP_WIDTH 40
 #define MAP_HEIGHT 28
-#define TILE_SIZE 8
+#define CITY_TILE_SIZE 8
 
 // Simple tile types
 #define TILE_FLOOR 0
@@ -78,9 +78,6 @@ static const u8 testMap[28][40] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
-// Camera offset
-static s16 cameraX = 0;
-static s16 cameraY = 0;
 
 // Animation timer for neon tiles
 static u16 animTimer = 0;
