@@ -1,5 +1,12 @@
-#include "game.h"
+//==============================================================================
+// PHANTASY QUEENY - Game System Initialization
+//==============================================================================
 
-// Empty for now - just to test compilation
-void initGame() {}
-///
+#include "game.h"
+#include <genesis.h>
+
+void initGameSystem(void) {
+    // Global initialization
+    // Seed random number generator
+    setRandomSeed(getTick());
+}
