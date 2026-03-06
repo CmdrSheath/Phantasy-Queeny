@@ -12,6 +12,9 @@ GameState currentState = STATE_TITLE;
 GameState nextState = STATE_TITLE;
 bool stateInitialized = false;
 
+// External function from game.c
+extern void initGameSystem(void);
+
 int main(bool hardReset)
 {
     // Initialize system
@@ -22,8 +25,8 @@ int main(bool hardReset)
     // Initialize joypad
     JOY_init();
     
-    // Initialize game
-    initGame();
+    // Initialize game (calls the one in game.c)
+    initGameSystem();
     
     // Start with title screen
     changeState(STATE_TITLE);
@@ -66,13 +69,6 @@ void changeState(GameState newState)
     // Switch to new state
     currentState = newState;
     stateInitialized = false;
-}
-
-void initGame(void)
-{
-    // Global initialization if needed
-    // Seed random number generator
-    setRandomSeed(getTick());
 }
 
 void updateGame(void)
