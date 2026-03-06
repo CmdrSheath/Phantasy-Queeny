@@ -25,7 +25,7 @@ typedef struct {
 
 // Function prototypes for state management
 void changeState(GameState newState);
-void initGame(void);
+void initGameSystem(void);
 void updateGame(void);
 
 // State-specific functions
