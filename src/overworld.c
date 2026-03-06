@@ -26,6 +26,7 @@ static s16 oldPlayerY = 14;
 static u16 moveTimer = 0;
 static u16 animTimer = 0;
 static u16 prevJoyState = 0;
+static u8 currentTile = 0;  // Track current tile for interaction
 
 // Simple test map (1 = wall, 0 = floor, 2 = neon, 3 = portal)
 static const u8 testMap[28][40] = {
@@ -95,7 +96,9 @@ void drawMap(void) {
 }
 
 void clearAndDrawPlayer(void) {
-    VDP_clearPlane(BG_B, TRUE);
+    // Clear only the text area where player was, not entire plane
+    // Actually, let's just clear a small region around player
+    VDP_clearTextAreaBG(BG_B, oldPlayerX, oldPlayerY, 1, 1);
     VDP_drawTextBG(BG_B, "Q", playerX, playerY);
 }
 
@@ -116,10 +119,10 @@ void forceInteract(void) {
             showMessage("Portal energy surges!");
             break;
         case TILE_NEON:
-            showMessage("Neon lights hum with energy...");
+            showMessage("Neon lights hum...");
             break;
         default:
-            showMessage("Nothing interesting here.");
+            showMessage("Nothing here.");
             break;
     }
 }
@@ -127,27 +130,32 @@ void forceInteract(void) {
 void checkTileInteraction(void) {
     u8 tile = testMap[playerY][playerX];
     
-    switch(tile) {
-        case TILE_PORTAL:
-            showMessage("A dimensional portal swirls...");
-            break;
-        case TILE_NEON:
-            showMessage("Neon lights flicker...");
-            break;
-        default:
-            break;
+    // Only show message if tile changed or it's a special tile
+    if (tile != currentTile) {
+        currentTile = tile;
+        
+        switch(tile) {
+            case TILE_PORTAL:
+                showMessage("A dimensional portal swirls...");
+                break;
+            case TILE_NEON:
+                showMessage("Neon lights flicker...");
+                break;
+        }
     }
 }
 
 void initOverworld(void) {
-    PAL_setColor(0, 0x0000);
-    PAL_setColor(1, 0x0444);
-    PAL_setColor(2, 0x0EEE);
-    PAL_setColor(3, 0x0088);
-    PAL_setColor(4, 0x00EE);
-    PAL_setColor(5, 0x0E00);
-    PAL_setColor(6, 0x0EE0);
+    // Set up palettes
+    PAL_setColor(0, 0x0000); // Black
+    PAL_setColor(1, 0x0444); // Dark gray
+    PAL_setColor(2, 0x0EEE); // White
+    PAL_setColor(3, 0x0088); // Blue
+    PAL_setColor(4, 0x00EE); // Cyan
+    PAL_setColor(5, 0x0E00); // Red
+    PAL_setColor(6, 0x0EE0); // Yellow
     
+    // Reset player
     playerX = 20;
     playerY = 14;
     oldPlayerX = 20;
@@ -155,14 +163,23 @@ void initOverworld(void) {
     moveTimer = 0;
     animTimer = 0;
     prevJoyState = 0;
+    currentTile = 0;
     
+    // Draw map on BG_A
     drawMap();
+    
+    // Clear BG_B for player and text
     VDP_clearPlane(BG_B, TRUE);
     
+    // Make sure BG_B is visible and on top
+    VDP_setPlanePriority(BG_B, TRUE);  // High priority
+    
+    // Show welcome message
     showMessage("Falcon City - Downtown");
 }
 
 void updateOverworld(void) {
+    // Animate neon
     animTimer++;
     if (animTimer >= 30) {
         animTimer = 0;
@@ -171,12 +188,15 @@ void updateOverworld(void) {
         PAL_setColor(4, temp);
     }
     
+    // Handle movement cooldown
     if (moveTimer > 0) {
         moveTimer--;
+        // Still draw player every frame
         clearAndDrawPlayer();
         return;
     }
     
+    // Read input
     u16 joyState = JOY_readJoypad(JOY_1);
     s16 dx = 0;
     s16 dy = 0;
@@ -187,18 +207,24 @@ void updateOverworld(void) {
     else if (joyState & BUTTON_LEFT) { dx = -1; moved = true; }
     else if (joyState & BUTTON_RIGHT) { dx = 1; moved = true; }
     
+    // Move player
     if (moved) {
         s16 newX = playerX + dx;
         s16 newY = playerY + dy;
         
         if (isWalkable(newX, newY)) {
+            oldPlayerX = playerX;
+            oldPlayerY = playerY;
             playerX = newX;
             playerY = newY;
             moveTimer = 8;
+            
+            // Check what we stepped on
             checkTileInteraction();
         }
     }
     
+    // Handle button presses (detect rising edge)
     u16 pressedButtons = joyState & ~prevJoyState;
     
     if (pressedButtons & BUTTON_A) {
@@ -206,11 +232,12 @@ void updateOverworld(void) {
     }
     
     if (pressedButtons & BUTTON_START) {
-        showMessage("Menu not implemented yet");
+        showMessage("Menu not implemented");
     }
     
     prevJoyState = joyState;
     
+    // Draw player
     clearAndDrawPlayer();
 }
 
