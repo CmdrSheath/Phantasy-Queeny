@@ -147,13 +147,21 @@ void checkTileInteraction(void) {
 
 void initOverworld(void) {
     // Set up palettes
-    PAL_setColor(0, 0x0000); // Black
-    PAL_setColor(1, 0x0444); // Dark gray
-    PAL_setColor(2, 0x0EEE); // White
-    PAL_setColor(3, 0x0088); // Blue
-    PAL_setColor(4, 0x00EE); // Cyan
-    PAL_setColor(5, 0x0E00); // Red
-    PAL_setColor(6, 0x0EE0); // Yellow
+    // White.   0x0EEE
+    // Blue.    0x0088
+    // Cyan.    0x00EE
+    // Red.     0x0E00
+    // Yellow.  0x0EE0
+
+    // Set up palettes
+    PAL_setColor(0, 0x0000); // Black (background)
+    PAL_setColor(1, 0x0444); // Dark gray (floor)
+    PAL_setColor(2, 0x0AAA); // Bright grey (walls) - was 0x0EEE (white)
+    PAL_setColor(3, 0x00E0); // Neon green dim - was 0x0088 (blue)
+    PAL_setColor(4, 0x00F0); // Neon green bright - was 0x00EE (cyan)
+    PAL_setColor(5, 0x000E); // Portal blue dim - was 0x0E00 (red)
+    PAL_setColor(6, 0x000F); // Portal blue bright - was 0x0EE0 (yellow)
+    
     
     // Reset player
     playerX = 20;
