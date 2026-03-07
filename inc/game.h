@@ -49,5 +49,7 @@ void cleanupCombat(void);
 void drawText(u16 x, u16 y, const char* text);
 void showMessage(const char* text);
 void clearMessage(void);
+void updateMessageTimer(void);
+
 
 #endif
