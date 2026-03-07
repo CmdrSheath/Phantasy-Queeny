@@ -171,9 +171,6 @@ void initOverworld(void) {
     // Clear BG_B for player and text
     VDP_clearPlane(BG_B, TRUE);
     
-    // Make sure BG_B is visible and on top
-    VDP_setPlanePriority(BG_B, TRUE);  // High priority
-    
     // Show welcome message
     showMessage("Falcon City - Downtown");
 }
