@@ -111,4 +111,6 @@ void updateGame(void)
         default:
             break;
     }
+
+    updateMessageTimer();
 }
