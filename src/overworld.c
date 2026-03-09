@@ -178,7 +178,6 @@ void initOverworld(void) {
     PAL_setColor(50, 0x000F); // Portal bright
     
     // NOW clear planes
-    VDP_clearPlane(BG_A, TRUE);
     VDP_clearPlane(BG_B, TRUE);
     
     // Reset player
@@ -197,9 +196,6 @@ void initOverworld(void) {
     // Show message
     showMessage("Falcon City - Downtown");
 }
-
-
-
 
 
 
