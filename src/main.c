@@ -61,6 +61,10 @@ void changeState(GameState newState)
             case STATE_COMBAT:
                 cleanupCombat();
                 break;
+            case STATE_PAUSE_MENU:
+                cleanupPauseMenu();
+                break;
+
             default:
                 break;
         }
@@ -88,6 +92,10 @@ void updateGame(void)
             case STATE_COMBAT:
                 initCombat();
                 break;
+        case STATE_PAUSE_MENU:
+            updatePauseMenu();
+            break;
+
             default:
                 break;
         }
