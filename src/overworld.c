@@ -152,16 +152,29 @@ void initOverworld(void) {
     // Cyan.    0x00EE
     // Red.     0x0E00
     // Yellow.  0x0EE0
+    // L Grey.  0x0AAA
+    // 
 
     // Set up palettes
-    PAL_setColor(0, 0x0000); // Black (background)
-    PAL_setColor(1, 0x0444); // Dark gray (floor)
-    PAL_setColor(2, 0x0AAA); // Bright grey (walls) - was 0x0EEE (white)
-    PAL_setColor(3, 0x00E0); // Neon green dim - was 0x0088 (blue)
-    PAL_setColor(4, 0x00F0); // Neon green bright - was 0x00EE (cyan)
-    PAL_setColor(5, 0x000E); // Portal blue dim - was 0x0E00 (red)
-    PAL_setColor(6, 0x000F); // Portal blue bright - was 0x0EE0 (yellow)
+   
+    // PAL0 colors (0-15) - used for floor and general
+    PAL_setColor(0, 0x0000);  // Black (transparent/background)
+    PAL_setColor(1, 0x0444);  // Dark gray (floor)
     
+    // PAL1 colors (16-31) - used for walls
+    // Color 16 in VDP is index 0 of PAL1
+    PAL_setColor(16, 0x0000); // Black (transparent for PAL1)
+    PAL_setColor(17, 0x0AAA); // Bright grey (walls) - tile uses color 1
+    
+    // PAL2 colors (32-47) - used for neon
+    PAL_setColor(32, 0x0000); // Black (transparent for PAL2)
+    PAL_setColor(33, 0x00E0); // Neon green dim - tile uses color 1
+    PAL_setColor(34, 0x00F0); // Neon green bright - for animation
+    
+    // PAL3 colors (48-63) - used for portal
+    PAL_setColor(48, 0x0000); // Black (transparent for PAL3)
+    PAL_setColor(49, 0x000E); // Portal blue dim - tile uses color 1
+    PAL_setColor(50, 0x000F); // Portal blue bright - for animation
     
     // Reset player
     playerX = 20;
@@ -182,6 +195,7 @@ void initOverworld(void) {
     // Show welcome message
     showMessage("Falcon City - Downtown");
 }
+
 
 void updateOverworld(void) {
     // Animate neon
