@@ -253,7 +253,9 @@ void updateOverworld(void) {
     }
     
     if (pressedButtons & BUTTON_START) {
-        showMessage("Menu not implemented");
+        // Open pause menu instead of showing message
+        changeState(STATE_PAUSE_MENU);
+        return;  // Exit update early since state changed
     }
     
     prevJoyState = joyState;
