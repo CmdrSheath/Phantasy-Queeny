@@ -61,30 +61,28 @@ static const u8 testMap[28][40] = {
 };
 
 void drawMap(void) {
-    VDP_clearPlane(BG_A, TRUE);
-    
     for (u16 y = 0; y < MAP_HEIGHT; y++) {
         for (u16 x = 0; x < MAP_WIDTH; x++) {
             u8 tile = testMap[y][x];
             u16 palette = PAL0;
-            u16 tileIndex;
+            u16 tileIndex = 0;
             
             switch(tile) {
                 case TILE_WALL:
                     tileIndex = 1;
-                    palette = PAL1;
+                    palette = PAL1;  // Uses color 17
                     break;
                 case TILE_NEON:
-                    tileIndex = 2;
-                    palette = PAL2;
+                    tileIndex = 1;
+                    palette = PAL2;  // Uses color 33
                     break;
                 case TILE_PORTAL:
-                    tileIndex = 3;
-                    palette = PAL3;
+                    tileIndex = 1;
+                    palette = PAL3;  // Uses color 49
                     break;
-                case TILE_FLOOR:
                 default:
                     tileIndex = 0;
+                    palette = PAL0;
                     break;
             }
             
@@ -94,6 +92,7 @@ void drawMap(void) {
         }
     }
 }
+
 
 void clearAndDrawPlayer(void) {
     // Clear only the text area where player was, not entire plane
