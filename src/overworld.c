@@ -202,10 +202,12 @@ void updateOverworld(void) {
     animTimer++;
     if (animTimer >= 30) {
         animTimer = 0;
-        u16 temp = PAL_getColor(3);
-        PAL_setColor(3, PAL_getColor(4));
-        PAL_setColor(4, temp);
+        // Swap colors 33 and 34 (PAL2 indices 1 and 2)
+        u16 temp = PAL_getColor(33);
+        PAL_setColor(33, PAL_getColor(34));
+        PAL_setColor(34, temp);
     }
+
     
     // Handle movement cooldown
     if (moveTimer > 0) {
