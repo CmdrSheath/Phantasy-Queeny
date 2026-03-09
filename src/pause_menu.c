@@ -89,6 +89,8 @@ void updatePauseMenu(void) {
 }
 
 void cleanupPauseMenu(void) {
-    // Just clear text, don't touch tiles
-    VDP_clearTextAreaBG(BG_B, 0, 0, 40, 28);
+    // Don't clear anything here - let overworld handle it
+    // Just reset the background color to be safe
+    PAL_setColor(0, 0x0000);
+
 }
