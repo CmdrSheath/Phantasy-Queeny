@@ -15,8 +15,20 @@ typedef enum {
     STATE_CUTSCENE,
     STATE_OVERWORLD,
     STATE_COMBAT,
-    STATE_DUNGEON
+    STATE_DUNGEON,
+    STATE_PAUSE_MENU  // New state
 } GameState;
+
+// Pause menu options
+typedef enum {
+    MENU_PARTY,
+    MENU_INVENTORY,
+    MENU_ALIGNMENT,
+    MENU_MAP,
+    MENU_OPTIONS,
+    MENU_SAVE,
+    MENU_COUNT
+} PauseMenuOption;
 
 // Party member struct (minimal)
 typedef struct {
@@ -45,11 +57,15 @@ void initCombat(void);
 void updateCombat(void);
 void cleanupCombat(void);
 
+// Pause menu functions
+void initPauseMenu(void);
+void updatePauseMenu(void);
+void cleanupPauseMenu(void);
+
 // UI functions
 void drawText(u16 x, u16 y, const char* text);
 void showMessage(const char* text);
 void clearMessage(void);
 void updateMessageTimer(void);
-
 
 #endif
