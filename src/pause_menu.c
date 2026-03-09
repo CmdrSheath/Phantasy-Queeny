@@ -24,51 +24,55 @@ static const char* menuLabels[MENU_COUNT] = {
 
 // Submenu content
 static void drawPartySubMenu(void) {
-    VDP_drawTextBG(BG_B, "PARTY INFO", 2, 2);
-    VDP_drawTextBG(BG_B, "==========", 2, 3);
-    VDP_drawTextBG(BG_B, "Queeny", 2, 5);
-    VDP_drawTextBG(BG_B, "HP: 100/100", 2, 6);
-    VDP_drawTextBG(BG_B, "MP: 50/50", 2, 7);
-    VDP_drawTextBG(BG_B, "Level: 1", 2, 8);
+    VDP_drawTextBG(BG_A, "PARTY INFO", 2, 2);
+    VDP_drawTextBG(BG_A, "==========", 2, 3);
+    VDP_drawTextBG(BG_A, "Queeny", 2, 5);
+    VDP_drawTextBG(BG_A, "HP: 100/100", 2, 6);
+    VDP_drawTextBG(BG_A, "MP: 50/50", 2, 7);
+    VDP_drawTextBG(BG_A, "Level: 1", 2, 8);
 }
 
 static void drawInventorySubMenu(void) {
-    VDP_drawTextBG(BG_B, "INVENTORY", 2, 2);
-    VDP_drawTextBG(BG_B, "=========", 2, 3);
-    VDP_drawTextBG(BG_B, "Empty...", 2, 5);
+    VDP_drawTextBG(BG_A, "INVENTORY", 2, 2);
+    VDP_drawTextBG(BG_A, "=========", 2, 3);
+    VDP_drawTextBG(BG_A, "Empty...", 2, 5);
 }
 
 static void drawAlignmentSubMenu(void) {
-    VDP_drawTextBG(BG_B, "ALIGNMENT", 2, 2);
-    VDP_drawTextBG(BG_B, "=========", 2, 3);
-    VDP_drawTextBG(BG_B, "Neutral", 2, 5);
-    VDP_drawTextBG(BG_B, "[====|====]", 2, 6);
+    VDP_drawTextBG(BG_A, "ALIGNMENT", 2, 2);
+    VDP_drawTextBG(BG_A, "=========", 2, 3);
+    VDP_drawTextBG(BG_A, "Neutral", 2, 5);
+    VDP_drawTextBG(BG_A, "[====|====]", 2, 6);
 }
 
 static void drawMapSubMenu(void) {
-    VDP_drawTextBG(BG_B, "MAP", 2, 2);
-    VDP_drawTextBG(BG_B, "===", 2, 3);
-    VDP_drawTextBG(BG_B, "Falcon City", 2, 5);
-    VDP_drawTextBG(BG_B, "Downtown", 2, 6);
+    VDP_drawTextBG(BG_A, "MAP", 2, 2);
+    VDP_drawTextBG(BG_A, "===", 2, 3);
+    VDP_drawTextBG(BG_A, "Falcon City", 2, 5);
+    VDP_drawTextBG(BG_A, "Downtown", 2, 6);
 }
 
 static void drawOptionsSubMenu(void) {
-    VDP_drawTextBG(BG_B, "OPTIONS", 2, 2);
-    VDP_drawTextBG(BG_B, "=======", 2, 3);
-    VDP_drawTextBG(BG_B, "SFX: ON", 2, 5);
-    VDP_drawTextBG(BG_B, "Music: ON", 2, 6);
+    VDP_drawTextBG(BG_A, "OPTIONS", 2, 2);
+    VDP_drawTextBG(BG_A, "=======", 2, 3);
+    VDP_drawTextBG(BG_A, "SFX: ON", 2, 5);
+    VDP_drawTextBG(BG_A, "Music: ON", 2, 6);
 }
 
 static void drawSaveSubMenu(void) {
-    VDP_drawTextBG(BG_B, "SAVE", 2, 2);
-    VDP_drawTextBG(BG_B, "====", 2, 3);
-    VDP_drawTextBG(BG_B, "Save game?", 2, 5);
-    VDP_drawTextBG(BG_B, "A: Yes  B: No", 2, 7);
+    VDP_drawTextBG(BG_A, "SAVE", 2, 2);
+    VDP_drawTextBG(BG_A, "====", 2, 3);
+    VDP_drawTextBG(BG_A, "Save game?", 2, 5);
+    VDP_drawTextBG(BG_A, "A: Yes  B: No", 2, 7);
 }
 
 static void drawSubMenu(void) {
-    // Clear left side area (columns 0-19, rows 0-27)
-    VDP_clearTextAreaBG(BG_B, 0, 0, 20, 28);
+    // Clear left side area on BG_A (columns 0-23)
+    for (u8 y = 0; y < 28; y++) {
+        for (u8 x = 0; x < 24; x++) {
+            VDP_setTileMapXY(BG_A, TILE_ATTR_FULL(PAL0, 0, 0, 0, 1), x, y);
+        }
+    }
     
     switch(currentSelection) {
         case MENU_PARTY:
@@ -95,29 +99,36 @@ static void drawSubMenu(void) {
 }
 
 static void drawMainMenu(void) {
-    // Draw right-side menu box (columns 25-38)
-    // Top border
-    VDP_drawTextBG(BG_B, "============", 25, 2);
+    // Draw right-side menu on BG_A (columns 25-38)
+    // Use tile 1 (solid) for background, PAL1 for grey color
+    
+    for (u8 y = 2; y < 4 + MENU_COUNT + 2; y++) {
+        for (u8 x = 25; x < 38; x++) {
+            VDP_setTileMapXY(BG_A, TILE_ATTR_FULL(PAL1, 0, 0, 0, 1), x, y);
+        }
+    }
+    
+    // Draw border
+    VDP_drawTextBG(BG_A, "============", 25, 2);
     
     // Menu items
     for(u8 i = 0; i < MENU_COUNT; i++) {
         if (i == currentSelection) {
-            // Draw cursor
-            VDP_drawTextBG(BG_B, ">", 25, 4 + i);
-            VDP_drawTextBG(BG_B, menuLabels[i], 27, 4 + i);
+            VDP_drawTextBG(BG_A, ">", 25, 4 + i);
+            VDP_drawTextBG(BG_A, menuLabels[i], 27, 4 + i);
         } else {
-            VDP_drawTextBG(BG_B, " ", 25, 4 + i);
-            VDP_drawTextBG(BG_B, menuLabels[i], 27, 4 + i);
+            VDP_drawTextBG(BG_A, " ", 25, 4 + i);
+            VDP_drawTextBG(BG_A, menuLabels[i], 27, 4 + i);
         }
     }
     
     // Bottom border
-    VDP_drawTextBG(BG_B, "============", 25, 4 + MENU_COUNT + 1);
+    VDP_drawTextBG(BG_A, "============", 25, 4 + MENU_COUNT + 1);
 }
 
 void initPauseMenu(void) {
-    // Clear BG_B for menu
-    VDP_clearPlane(BG_B, TRUE);
+    // Store current game screen (it's on BG_A)
+    // We'll draw menu over it on BG_A
     
     // Reset state
     currentSelection = MENU_PARTY;
@@ -127,8 +138,8 @@ void initPauseMenu(void) {
     // Draw initial menu
     drawMainMenu();
     
-    // Show hint
-    showMessage("A:Select C:Back START/B:Close");
+    // Show hint at bottom
+    VDP_drawTextBG(BG_A, "A:SELECT C:BACK START/B:CLOSE", 2, 26);
 }
 
 void updatePauseMenu(void) {
@@ -140,20 +151,22 @@ void updatePauseMenu(void) {
         if (pressed & (BUTTON_C | BUTTON_B)) {
             // Back to main menu
             inSubMenu = false;
-            // Clear left side
-            VDP_clearTextAreaBG(BG_B, 0, 0, 24, 28);
-            // Redraw main menu
-            drawMainMenu();
+            // Redraw just the menu (restore map underneath)
+            initOverworld();  // Restore map
+            drawMainMenu();   // Draw menu on top
         }
-        // A button handles submenu action
         else if (pressed & BUTTON_A) {
-            // Handle submenu selection (placeholder)
-            // For save menu, this would trigger save, etc.
+            // Handle submenu action
+            if (currentSelection == MENU_SAVE) {
+                // Save game placeholder
+                VDP_drawTextBG(BG_A, "SAVED!", 10, 15);
+                waitMs(500);
+            }
         }
     } else {
         // In main menu mode
         if (pressed & (BUTTON_START | BUTTON_B)) {
-            // Close pause menu
+            // Close pause menu - restore overworld
             changeState(STATE_OVERWORLD);
             return;
         }
@@ -184,6 +197,7 @@ void updatePauseMenu(void) {
 }
 
 void cleanupPauseMenu(void) {
-    VDP_clearPlane(BG_B, TRUE);
+    // Just re-init overworld to restore everything
+    initOverworld();
     clearMessage();
 }
