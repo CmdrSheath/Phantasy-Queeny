@@ -1,103 +1,94 @@
 //==============================================================================
-// PHANTASY QUEENY - Pause Menu System
-// Simple floating menu on right side
+// PHANTASY QUEENY - Pause Menu System (DEBUG VERSION)
 //==============================================================================
 
 #include <genesis.h>
 #include <string.h>
 #include "game.h"
 
-// Menu state
 static PauseMenuOption currentSelection = MENU_PARTY;
 static u16 prevJoyState = 0;
 
-// Menu labels
 static const char* menuLabels[MENU_COUNT] = {
-    "PARTY",
-    "INV",
-    "ALIGN",
-    "MAP",
-    "OPT",
-    "SAVE"
+    "PARTY", "INV", "ALIGN", "MAP", "OPT", "SAVE"
 };
 
 void initPauseMenu(void) {
-    // Ensure BG_B is clear (transparent) except our menu area
-    VDP_clearPlane(BG_B, TRUE);
+    // FLASH SCREEN BLUE to prove we got here
+    PAL_setColor(0, 0x000E);  // Background = blue
+    VDP_waitVSync();
     
-    // Reset state
+    // Small delay to see the flash
+    for(u16 i = 0; i < 30; i++) VDP_waitVSync();
+    
+    // Restore black background
+    PAL_setColor(0, 0x0000);
+    
+    // Clear only text area, not whole plane
+    VDP_clearTextAreaBG(BG_B, 0, 0, 40, 28);
+    
     currentSelection = MENU_PARTY;
     prevJoyState = 0;
     
-    // Draw small menu box on right side (columns 28-37, rows 4-14)
-    // Top border
-    VDP_drawTextBG(BG_B, "----------", 28, 4);
-    VDP_drawTextBG(BG_B, "MENU", 30, 5);
-    VDP_drawTextBG(BG_B, "----------", 28, 6);
+    // Draw menu at top-right (small)
+    VDP_drawTextBG(BG_B, "+--------+", 28, 2);
+    VDP_drawTextBG(BG_B, "|  MENU  |", 28, 3);
+    VDP_drawTextBG(BG_B, "+--------+", 28, 4);
     
-    // Menu items
+    // Draw items
     for(u8 i = 0; i < MENU_COUNT; i++) {
-        VDP_drawTextBG(BG_B, menuLabels[i], 30, 8 + i);
+        VDP_drawTextBG(BG_B, menuLabels[i], 30, 6 + i);
     }
     
-    // Bottom border
-    VDP_drawTextBG(BG_B, "----------", 28, 8 + MENU_COUNT);
+    // Cursor
+    VDP_drawTextBG(BG_B, ">", 28, 6);
     
-    // Draw initial cursor
-    VDP_drawTextBG(BG_B, ">", 28, 8);
-    
-    // Controls hint at bottom of screen
-    VDP_drawTextBG(BG_B, "A:SEL B:BACK START:CLOSE", 2, 26);
+    // Controls at bottom
+    VDP_drawTextBG(BG_B, "A=SEL B/START=CLOSE", 2, 26);
 }
 
 void updatePauseMenu(void) {
     u16 joyState = JOY_readJoypad(JOY_1);
     u16 pressed = joyState & ~prevJoyState;
     
-    // Close menu
+    // CLOSE MENU - most important!
     if (pressed & (BUTTON_START | BUTTON_B)) {
+        // FLASH GREEN to show we're exiting
+        PAL_setColor(0, 0x00E0);
+        for(u16 i = 0; i < 10; i++) VDP_waitVSync();
+        PAL_setColor(0, 0x0000);
+        
         changeState(STATE_OVERWORLD);
         return;
     }
     
-    // Navigate
     if (pressed & BUTTON_UP) {
         if (currentSelection > 0) {
-            // Clear old cursor
-            VDP_drawTextBG(BG_B, " ", 28, 8 + currentSelection);
+            VDP_drawTextBG(BG_B, " ", 28, 6 + currentSelection);
             currentSelection--;
-            // Draw new cursor
-            VDP_drawTextBG(BG_B, ">", 28, 8 + currentSelection);
+            VDP_drawTextBG(BG_B, ">", 28, 6 + currentSelection);
         }
     }
     
     if (pressed & BUTTON_DOWN) {
         if (currentSelection < MENU_COUNT - 1) {
-            // Clear old cursor
-            VDP_drawTextBG(BG_B, " ", 28, 8 + currentSelection);
+            VDP_drawTextBG(BG_B, " ", 28, 6 + currentSelection);
             currentSelection++;
-            // Draw new cursor
-            VDP_drawTextBG(BG_B, ">", 28, 8 + currentSelection);
+            VDP_drawTextBG(BG_B, ">", 28, 6 + currentSelection);
         }
     }
     
-    // Select (placeholder - just show message for now)
     if (pressed & BUTTON_A) {
-        // Show what was selected
-        char msg[32];
-        sprintf(msg, "Selected: %s", menuLabels[currentSelection]);
-        
-        // Draw selection indicator
-        VDP_drawTextBG(BG_B, ">>", 26, 8 + currentSelection);
-        
-        // For now, just a visual feedback
-        // In future, this would open submenu or perform action
+        // FLASH RED for selection
+        PAL_setColor(0, 0x0E00);
+        for(u16 i = 0; i < 10; i++) VDP_waitVSync();
+        PAL_setColor(0, 0x0000);
     }
     
     prevJoyState = joyState;
 }
 
 void cleanupPauseMenu(void) {
-    // Clear BG_B completely to remove menu
-    VDP_clearPlane(BG_B, TRUE);
+    // Just clear text, don't touch tiles
+    VDP_clearTextAreaBG(BG_B, 0, 0, 40, 28);
 }
