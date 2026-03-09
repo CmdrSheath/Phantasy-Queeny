@@ -158,23 +158,47 @@ void initOverworld(void) {
     // Set up palettes
    
     // PAL0 colors (0-15) - used for floor and general
-    PAL_setColor(0, 0x0000);  // Black (transparent/background)
-    PAL_setColor(1, 0x0444);  // Dark gray (floor)
+    //PAL_setColor(0, 0x0000);  // Black (transparent/background)
+    //PAL_setColor(1, 0x0444);  // Dark gray (floor)
     
     // PAL1 colors (16-31) - used for walls
     // Color 16 in VDP is index 0 of PAL1
-    PAL_setColor(16, 0x0000); // Black (transparent for PAL1)
-    PAL_setColor(17, 0x0AAA); // Bright grey (walls) - tile uses color 1
+    //PAL_setColor(16, 0x0000); // Black (transparent for PAL1)
+    //PAL_setColor(17, 0x0AAA); // Bright grey (walls) - tile uses color 1
     
     // PAL2 colors (32-47) - used for neon
-    PAL_setColor(32, 0x0000); // Black (transparent for PAL2)
-    PAL_setColor(33, 0x00E0); // Neon green dim - tile uses color 1
-    PAL_setColor(34, 0x00F0); // Neon green bright - for animation
+    //PAL_setColor(32, 0x0000); // Black (transparent for PAL2)
+    //PAL_setColor(33, 0x00E0); // Neon green dim - tile uses color 1
+    //PAL_setColor(34, 0x00F0); // Neon green bright - for animation
     
     // PAL3 colors (48-63) - used for portal
-    PAL_setColor(48, 0x0000); // Black (transparent for PAL3)
-    PAL_setColor(49, 0x000E); // Portal blue dim - tile uses color 1
-    PAL_setColor(50, 0x000F); // Portal blue bright - for animation
+    //PAL_setColor(48, 0x0000); // Black (transparent for PAL3)
+    //PAL_setColor(49, 0x000E); // Portal blue dim - tile uses color 1
+    //PAL_setColor(50, 0x000F); // Portal blue bright - for animation
+    
+    
+    // Force clear both planes to be safe
+    VDP_clearPlane(BG_A, TRUE);
+    VDP_clearPlane(BG_B, TRUE);
+    
+    // Set up palettes
+    PAL_setColor(0, 0x0000);
+    PAL_setColor(1, 0x0444);
+    PAL_setColor(2, 0x0AAA);
+    PAL_setColor(3, 0x00E0);
+    PAL_setColor(4, 0x00F0);
+    PAL_setColor(5, 0x000E);
+    PAL_setColor(6, 0x000F);
+    
+    // Also set PAL1, PAL2, PAL3 colors
+    PAL_setColor(16, 0x0000);
+    PAL_setColor(17, 0x0AAA);
+    PAL_setColor(32, 0x0000);
+    PAL_setColor(33, 0x00E0);
+    PAL_setColor(34, 0x00F0);
+    PAL_setColor(48, 0x0000);
+    PAL_setColor(49, 0x000E);
+    PAL_setColor(50, 0x000F);
     
     // Reset player
     playerX = 20;
@@ -186,15 +210,16 @@ void initOverworld(void) {
     prevJoyState = 0;
     currentTile = 0;
     
-    // Draw map on BG_A
+    // Redraw everything
     drawMap();
     
-    // Clear BG_B for player and text
-    VDP_clearPlane(BG_B, TRUE);
-    
-    // Show welcome message
+    // Show message
     showMessage("Falcon City - Downtown");
 }
+
+
+
+
 
 
 void updateOverworld(void) {
