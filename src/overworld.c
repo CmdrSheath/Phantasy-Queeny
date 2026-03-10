@@ -196,6 +196,8 @@ void initOverworld(void) {
     
     // Show message
     showMessage("Falcon City - Downtown");
+
+    playMusic (MUSIC_OVERWORLD);
 }
 
 
