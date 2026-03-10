@@ -152,6 +152,7 @@ void initOverworld(void) {
     // Red.     0x0E00
     // Yellow.  0x0EE0
     // L Grey.  0x0AAA
+    // portal blue. 0x000E
     // 
     // PAL0 (colors 0-15)
     PAL_setColor(0, 0x0000);  // Black transparent
@@ -159,7 +160,7 @@ void initOverworld(void) {
     PAL_setColor(2, 0x0AAA);  // Light grey walls
     PAL_setColor(3, 0x00E0);  // Neon green dim
     PAL_setColor(4, 0x00F0);  // Neon green bright
-    PAL_setColor(5, 0x000E);  // Portal blue dim
+    PAL_setColor(5, 0x00EE);  // Portal blue dim
     PAL_setColor(6, 0x000F);  // Portal blue bright
     PAL_setColor(15, 0x0EEE); // White text
     
@@ -174,7 +175,7 @@ void initOverworld(void) {
     
     // PAL3 (colors 48-63) - portal uses color 49
     PAL_setColor(48, 0x0000); // Transparent
-    PAL_setColor(49, 0x000E); // Portal
+    PAL_setColor(49, 0x00EE); // Portal
     PAL_setColor(50, 0x000F); // Portal bright
     
     // NOW clear planes
