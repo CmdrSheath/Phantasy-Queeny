@@ -92,10 +92,9 @@ void updateGame(void)
             case STATE_COMBAT:
                 initCombat();
                 break;
-        case STATE_PAUSE_MENU:
-            updatePauseMenu();
-            break;
-
+            case STATE_PAUSE_MENU:
+                initPauseMenu();
+                 break;
             default:
                 break;
         }
@@ -115,6 +114,9 @@ void updateGame(void)
             break;
         case STATE_COMBAT:
             updateCombat();
+            break;
+        case STATE_PAUSE_MENU
+            updatePauseMenu();
             break;
         default:
             break;
