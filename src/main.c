@@ -101,6 +101,9 @@ void updateGame(void)
         stateInitialized = true;
     }
     
+
+    updateAudio();
+
     // Update current state
     switch(currentState) {
         case STATE_TITLE:
