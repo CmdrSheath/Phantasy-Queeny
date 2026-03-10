@@ -13,3 +13,8 @@ all:
 
 clean:
 	$(MAKE) -f $(GDK)/makefile.gen clean
+
+RESOURCES += res/resources.res
+
+# Audio processing flags
+WAVCONVERT_FLAGS = -rate 22050 -format pcm8
