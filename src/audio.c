@@ -264,7 +264,7 @@ void initAudio(void) {
     YM2612_reset();
     
     // Initialize PSG (SN76489)
-    PSG_init();
+    PSG_reset();
     
     // Load instrument patches
     loadFMPatch(0, fmPatchSquare);   // Main
