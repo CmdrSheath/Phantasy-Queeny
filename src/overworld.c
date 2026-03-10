@@ -269,7 +269,7 @@ void updateOverworld(void) {
 }
 
 void cleanupOverworld(void) {
-    VDP_clearPlane(BG_A, TRUE);
+    //VDP_clearPlane(BG_A, TRUE);
     VDP_clearPlane(BG_B, TRUE);
     clearMessage();
 }
