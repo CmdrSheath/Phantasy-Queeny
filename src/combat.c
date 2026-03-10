@@ -33,6 +33,9 @@ void initCombat(void) {
     VDP_drawText("B: Magic", 25, 19);
     VDP_drawText("C: Item", 25, 20);
     VDP_drawText("START: Flee", 25, 21);
+
+    playMusic(MUSIC_COMBAT);
+    playSFX(SFX_COMBAT_START);
     
     showMessage("A wild Slasher appears!");
 }
