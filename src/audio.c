@@ -280,7 +280,7 @@ void initAudio(void) {
     musicPlaying = false;
     
     // Set default PSG noise for hi-hats
-    PSG_setNoise(0, PSG_NOISE_TYPE_WHITE, PSG_NOISE_FREQ_TONE3);
+    PSG_setNoise(PSG_NOISE_TYPE_WHITE, PSG_NOISE_FREQ_TONE3);
 }
 
 void playMusic(MusicTrack track) {
@@ -368,7 +368,7 @@ void playSFX(SoundEffect sfx) {
             
         case SFX_ATTACK:
             // Noise burst
-            PSG_setNoise(3, PSG_NOISE_TYPE_WHITE, PSG_NOISE_FREQ_HIGHEST);
+            PSG_setNoise(PSG_NOISE_TYPE_WHITE, PSG_NOISE_FREQ_TONE3);
             PSG_setEnvelope(3, PSG_ENVELOPE_MIN);
             break;
             
