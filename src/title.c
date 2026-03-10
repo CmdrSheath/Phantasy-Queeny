@@ -31,6 +31,8 @@ void initTitle(void)
     VDP_drawText("D-PAD: Move", 13, 18);
     VDP_drawText("A: Interact", 13, 19);
     VDP_drawText("START: Menu", 13, 20);
+
+    playMusic(MUSIC_TITLE);
     
     blinkTimer = 0;
     showPressStart = true;
