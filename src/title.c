@@ -5,6 +5,7 @@
 #include <genesis.h>
 #include <string.h>
 #include "game.h"
+#include "audio.h"
 
 static u16 blinkTimer = 0;
 static bool showPressStart = true;
