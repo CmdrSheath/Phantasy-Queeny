@@ -162,9 +162,9 @@ static MusicPattern currentPattern;
 static u8 activeTracks = 0x0F; // All 4 tracks active
 
 // Sound effect priority system
-static u8 sfxPriority[SFX_COUNT] = {
-    1, 1, 1, 2, 3, 3, 3, 3, 4  // Higher = more important
-};
+// code no longer used
+// static u8 sfxPriority[SFX_COUNT] = { 1, 1, 1, 2, 3, 3, 3, 3, 4  // Higher = more important };
+////
 
 static void loadFMPatch(u8 channel, const u8* patch) {
     // Set YM2612 registers for FM channel
