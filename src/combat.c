@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "game.h"
+#include "audio.h"
 
 void initCombat(void) {
     // Clear screen
