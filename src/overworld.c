@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "game.h"
+#include "audio.h"
 
 // Map dimensions (in tiles)
 #define MAP_WIDTH 40
