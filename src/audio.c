@@ -397,6 +397,5 @@ void playSFX(SoundEffect sfx) {
 void updateAudio(void) {
     updateSequencer();
     
-    // Update PSG envelopes for sound effects
-    PSG_updateEnvelopes();
+   
 }
