@@ -54,6 +54,11 @@ void updateTitle(void)
         }
     }
     
+
+
+    // Check for start button
+    u16 joyState = JOY_readJoypad(JOY_1);
+
     // TEST: Press A button for sound effect
     if (joyState & BUTTON_A) { 
         playSFX(SFX_MENU_SELECT);
@@ -61,9 +66,6 @@ void updateTitle(void)
         // Debounce
     }
 
-
-    // Check for start button
-    u16 joyState = JOY_readJoypad(JOY_1);
     if (joyState & BUTTON_START) {
         // Small delay to prevent accidental double-press
         waitMs(200);
