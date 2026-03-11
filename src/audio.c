@@ -322,8 +322,7 @@ void stopMusic(void) {
     for(u8 i = 0; i < 6; i++) {
         YM2612_writeReg(0, 0x28, i);
     }
-    
-    PSG_stop();
+ 
 }
 
 void pauseMusic(void) {
