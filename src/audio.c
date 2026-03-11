@@ -260,6 +260,12 @@ static void updateSequencer(void) {
 }
 
 void initAudio(void) {
+
+    // Visual debug - flash screen white briefly
+    PAL_setColor(0, 0x0EEE); // White
+    waitMs(100);
+    PAL_setColor(0, 0x0000); // Back to black
+
     // Initialize YM2612 FM chip
     YM2612_reset();
     
