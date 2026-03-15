@@ -39,6 +39,14 @@ static const u16 counterMelody[] = {
 };
 
 void initAudio(void) {
+
+void initAudio(void) {
+    // Visual debug - flash screen white briefly
+    PAL_setColor(0, 0x0EEE);  // White
+    waitMs(100);
+    PAL_setColor(0, 0x0000);  // Back to black
+    
+    YM2612_reset();
     PSG_reset();
     musicTimer = 0;
     musicStep = 0;
