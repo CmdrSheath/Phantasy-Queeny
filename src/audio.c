@@ -13,7 +13,6 @@ static bool musicPlaying = FALSE;
 static MusicTrack currentTrack = MUSIC_TITLE;
 
 // Note frequencies (NTSC) for PSG
-// A4 = 440Hz, PSG frequency = 3579545 / (32 * Hz)
 #define NOTE_A3  406
 #define NOTE_B3  362
 #define NOTE_C4  342
@@ -39,15 +38,6 @@ static const u16 counterMelody[] = {
 };
 
 void initAudio(void) {
-
-void initAudio(void) {
-    // Visual debug - flash screen white briefly
-    PAL_setColor(0, 0x0EEE);  // White
-    waitMs(100);
-    PAL_setColor(0, 0x0000);  // Back to black
-    
-//
-    YM2612_reset();
     PSG_reset();
     musicTimer = 0;
     musicStep = 0;
@@ -113,27 +103,27 @@ void updateAudio(void) {
     if (!musicPlaying) return;
     
     musicTimer++;
-    if (musicTimer < 30) return;  // 30 frames = 0.5s per note (120 BPM)
+    if (musicTimer < 30) return;
     musicTimer = 0;
     
     // Play main melody on channel 0
     u16 note = overworldMelody[musicStep];
     if (note != NOTE_REST) {
         PSG_setTone(0, note);
-        PSG_setEnvelope(0, PSG_ENVELOPE_ALTERNATE);  // Sustained tone
+        PSG_setEnvelope(0, PSG_ENVELOPE_MAX);
     } else {
         PSG_setTone(0, NOTE_REST);
     }
     
-    // Play counter melody on channel 1 (one octave lower, same rhythm)
+    // Play counter melody on channel 1
     u16 bassNote = counterMelody[musicStep];
     if (bassNote != NOTE_REST) {
         PSG_setTone(1, bassNote);
-        PSG_setEnvelope(1, PSG_ENVELOPE_ALTERNATE);
+        PSG_setEnvelope(1, PSG_ENVELOPE_MAX);
     } else {
         PSG_setTone(1, NOTE_REST);
     }
     
     musicStep++;
-    if (musicStep >= 16) musicStep = 0;  // Loop 16-step pattern
+    if (musicStep >= 16) musicStep = 0;
 }
