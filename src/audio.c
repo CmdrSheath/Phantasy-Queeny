@@ -46,6 +46,7 @@ void initAudio(void) {
     waitMs(100);
     PAL_setColor(0, 0x0000);  // Back to black
     
+//
     YM2612_reset();
     PSG_reset();
     musicTimer = 0;
