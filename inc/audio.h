@@ -17,28 +17,24 @@ typedef enum {
     SFX_COUNT
 } SoundEffect;
 
-// Music track IDs
+// Music track IDs - add new scenes here
 typedef enum {
     MUSIC_TITLE,
+    MUSIC_CUTSCENE,
     MUSIC_OVERWORLD,
     MUSIC_COMBAT,
     MUSIC_DUNGEON,
+    MUSIC_VICTORY,
     MUSIC_COUNT
 } MusicTrack;
 
-// Initialize sound system
+// Function prototypes
 void initAudio(void);
-
-// Music control
 void playMusic(MusicTrack track);
 void stopMusic(void);
 void pauseMusic(void);
 void resumeMusic(void);
-
-// Sound effects
 void playSFX(SoundEffect sfx);
-
-// Update audio system (call in game loop)
 void updateAudio(void);
 
 #endif
