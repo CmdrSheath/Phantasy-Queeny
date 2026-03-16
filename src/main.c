@@ -6,6 +6,7 @@
 #include <genesis.h>
 #include <string.h>
 #include "game.h"
+#include "audio.h"
 
 // Current game state
 GameState currentState = STATE_TITLE;
