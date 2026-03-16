@@ -5,7 +5,7 @@
 
 #include <genesis.h>
 #include <string.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include "game.h"
 #include "audio.h"
 
