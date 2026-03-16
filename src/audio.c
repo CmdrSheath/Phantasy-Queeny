@@ -1,6 +1,5 @@
 //==============================================================================
-// PHANTASY QUEENY - Audio System
-// PSG channels: 0=Music Melody, 1=Music Bass, 2=SFX, 3=SFX2
+// PHANTASY QUEENY - Audio System with Visual Debug
 //==============================================================================
 
 #include "audio.h"
@@ -12,7 +11,7 @@ static u8 musicStep = 0;
 static bool musicPlaying = FALSE;
 static MusicTrack currentTrack = MUSIC_TITLE;
 
-// Note frequencies (NTSC PSG)
+// Note frequencies
 #define NOTE_A2  812
 #define NOTE_B2  724
 #define NOTE_C3  684
@@ -36,10 +35,11 @@ static MusicTrack currentTrack = MUSIC_TITLE;
 #define NOTE_G5  114
 #define NOTE_REST 0
 
-// SFX timer to cut off sounds
-static u8 sfxTimer = 0;
+// Debug visual
+static u8 debugSFXCount = 0;
+static u8 debugTimer = 0;
 
-// --- TITLE MUSIC ---
+// --- MUSIC DATA ---
 static const u16 titleMelody[] = {
     NOTE_D4, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_G4, NOTE_F4, NOTE_E4, NOTE_D4,
     NOTE_C4, NOTE_D4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_D4, NOTE_REST, NOTE_REST
@@ -48,18 +48,6 @@ static const u16 titleCounter[] = {
     NOTE_D3, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_D3, NOTE_REST, NOTE_REST, NOTE_REST,
     NOTE_D3, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_D3, NOTE_REST, NOTE_REST, NOTE_REST
 };
-
-// --- CUTSCENE MUSIC ---
-static const u16 cutsceneMelody[] = {
-    NOTE_C4, NOTE_E4, NOTE_G4, NOTE_C5, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_E4,
-    NOTE_G4, NOTE_C5, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_REST, NOTE_REST, NOTE_REST
-};
-static const u16 cutsceneCounter[] = {
-    NOTE_C3, NOTE_REST, NOTE_G3, NOTE_REST, NOTE_C3, NOTE_REST, NOTE_G3, NOTE_REST,
-    NOTE_C3, NOTE_REST, NOTE_G3, NOTE_REST, NOTE_C3, NOTE_REST, NOTE_REST, NOTE_REST
-};
-
-// --- OVERWORLD MUSIC ---
 static const u16 overworldMelody[] = {
     NOTE_A4, NOTE_A4, NOTE_B4, NOTE_C5, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_G4,
     NOTE_G4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_C4, NOTE_B3, NOTE_A3, NOTE_A3
@@ -68,8 +56,6 @@ static const u16 overworldCounter[] = {
     NOTE_A3, NOTE_A3, NOTE_REST, NOTE_REST, NOTE_A3, NOTE_A3, NOTE_REST, NOTE_REST,
     NOTE_A3, NOTE_A3, NOTE_REST, NOTE_REST, NOTE_A3, NOTE_A3, NOTE_REST, NOTE_REST
 };
-
-// --- COMBAT MUSIC ---
 static const u16 combatMelody[] = {
     NOTE_E4, NOTE_E4, NOTE_G4, NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4,
     NOTE_G4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4
@@ -79,26 +65,6 @@ static const u16 combatCounter[] = {
     NOTE_E3, NOTE_REST, NOTE_E3, NOTE_REST, NOTE_E3, NOTE_REST, NOTE_E3, NOTE_REST
 };
 
-// --- DUNGEON MUSIC ---
-static const u16 dungeonMelody[] = {
-    NOTE_A3, NOTE_G3, NOTE_F3, NOTE_E3, NOTE_D3, NOTE_C3, NOTE_D3, NOTE_E3,
-    NOTE_F3, NOTE_G3, NOTE_A3, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST
-};
-static const u16 dungeonCounter[] = {
-    NOTE_A2, NOTE_REST, NOTE_A2, NOTE_REST, NOTE_A2, NOTE_REST, NOTE_A2, NOTE_REST,
-    NOTE_A2, NOTE_REST, NOTE_A2, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST
-};
-
-// --- VICTORY MUSIC ---
-static const u16 victoryMelody[] = {
-    NOTE_C4, NOTE_E4, NOTE_G4, NOTE_C5, NOTE_REST, NOTE_G4, NOTE_E4, NOTE_C4,
-    NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST
-};
-static const u16 victoryCounter[] = {
-    NOTE_C3, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST,
-    NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST, NOTE_REST
-};
-
 typedef struct {
     const u16* melody;
     const u16* counter;
@@ -106,12 +72,9 @@ typedef struct {
 } MusicTrackData;
 
 static const MusicTrackData musicTracks[] = {
-    [MUSIC_TITLE]    = {titleMelody,    titleCounter,    40},
-    [MUSIC_CUTSCENE] = {cutsceneMelody, cutsceneCounter, 35},
-    [MUSIC_OVERWORLD]= {overworldMelody,overworldCounter,30},
-    [MUSIC_COMBAT]   = {combatMelody,   combatCounter,   20},
-    [MUSIC_DUNGEON]  = {dungeonMelody,  dungeonCounter,  45},
-    [MUSIC_VICTORY]  = {victoryMelody,  victoryCounter,  25}
+    [MUSIC_TITLE]     = {titleMelody,     titleCounter,     40},
+    [MUSIC_OVERWORLD]= {overworldMelody, overworldCounter, 30},
+    [MUSIC_COMBAT]   = {combatMelody,    combatCounter,    20}
 };
 
 void initAudio(void) {
@@ -120,13 +83,8 @@ void initAudio(void) {
     musicStep = 0;
     musicPlaying = FALSE;
     currentTrack = MUSIC_TITLE;
-    sfxTimer = 0;
-    
-    // Startup beep
-    PSG_setTone(0, NOTE_A4);
-    PSG_setEnvelope(0, PSG_ENVELOPE_MIN);
-    waitMs(100);
-    PSG_setTone(0, NOTE_REST);
+    debugSFXCount = 0;
+    debugTimer = 0;
 }
 
 void playMusic(MusicTrack track) {
@@ -154,73 +112,58 @@ void resumeMusic(void) {
 }
 
 void playSFX(SoundEffect sfx) {
-    // Use channel 2 for all SFX (channel 3 reserved for secondary SFX)
-    // Use longer envelope for audible duration
+    // Visual debug: flash bottom left corner
+    debugSFXCount++;
+    debugTimer = 30;  // Show for 30 frames (0.5 seconds)
+    
+    // Draw debug indicator
+    char debugStr[4];
+    debugStr[0] = 'S';
+    debugStr[1] = '0' + (debugSFXCount % 10);
+    debugStr[2] = '\0';
+    VDP_drawTextBG(BG_B, debugStr, 0, 26);  // Bottom left
+    
+    // Flash color
+    PAL_setColor(15, 0x0EEE);  // White
+    
+    // Try multiple methods to play sound
+    
+    // Method 1: Direct PSG register write (bypass SGDK)
+    volatile u16* psg = (volatile u16*)0xC00011;
     
     switch(sfx) {
         case SFX_MENU_MOVE:
-            PSG_setTone(2, NOTE_E4);
-            PSG_setEnvelope(2, 8);  // Medium duration
-            sfxTimer = 10;  // 10 frames
+            *psg = 0x9E4;  // Channel 2, tone E4
+            *psg = 0xB08;  // Volume 8
             break;
-            
         case SFX_MENU_SELECT:
-            PSG_setTone(2, NOTE_A4);
-            PSG_setEnvelope(2, 10);  // Longer for confirm
-            sfxTimer = 15;
+            *psg = 0x9CB;  // Channel 2, tone A4
+            *psg = 0xB06;  // Volume 6
             break;
-            
         case SFX_MENU_CANCEL:
-            PSG_setTone(2, NOTE_C4);
-            PSG_setEnvelope(2, 8);
-            sfxTimer = 10;
+            *psg = 0x9D5;  // Channel 2, tone C4
+            *psg = 0xB08;
             break;
-            
         case SFX_PORTAL_HUM:
-            PSG_setTone(2, NOTE_G3);
-            PSG_setEnvelope(2, 12);
-            sfxTimer = 20;
+            *psg = 0x9E5;  // Channel 2, tone G3
+            *psg = 0xB04;
             break;
-            
-        case SFX_COMBAT_START:
-            PSG_setTone(2, NOTE_E4);
-            PSG_setEnvelope(2, 15);
-            sfxTimer = 25;
-            break;
-            
-        case SFX_ATTACK:
-            PSG_setTone(3, NOTE_A3);  // Use channel 3
-            PSG_setEnvelope(3, 8);
-            break;
-            
-        case SFX_MAGIC:
-            PSG_setTone(2, NOTE_C5);
-            PSG_setEnvelope(2, 10);
-            sfxTimer = 15;
-            break;
-            
-        case SFX_DAMAGE:
-            PSG_setTone(3, NOTE_E3);  // Use channel 3
-            PSG_setEnvelope(3, 6);
-            break;
-            
-        case SFX_VICTORY:
-            PSG_setTone(2, NOTE_C5);
-            PSG_setEnvelope(2, 15);
-            sfxTimer = 30;
-            break;
-            
         default:
+            *psg = 0x9C0;  // Channel 2, tone A4
+            *psg = 0xB08;
             break;
     }
 }
 
 void updateAudio(void) {
-    // Handle SFX timeout
-    if (sfxTimer > 0) {
-        sfxTimer--;
-        if (sfxTimer == 0) {
-            PSG_setTone(2, NOTE_REST);
+    // Handle debug display
+    if (debugTimer > 0) {
+        debugTimer--;
+        if (debugTimer == 0) {
+            VDP_clearText(0, 26, 2);  // Clear debug
+            PAL_setColor(15, 0x0EEE);  // Reset white
+        } else if (debugTimer == 15) {
+            PAL_setColor(15, 0x0E00);  // Flash red mid-way
         }
     }
     
@@ -234,7 +177,6 @@ void updateAudio(void) {
     if (musicTimer < track->tempo) return;
     musicTimer = 0;
     
-    // Channel 0 = Melody
     u16 note = track->melody[musicStep];
     if (note != NOTE_REST) {
         PSG_setTone(0, note);
@@ -243,7 +185,6 @@ void updateAudio(void) {
         PSG_setTone(0, NOTE_REST);
     }
     
-    // Channel 1 = Bass
     u16 bassNote = track->counter[musicStep];
     if (bassNote != NOTE_REST) {
         PSG_setTone(1, bassNote);
