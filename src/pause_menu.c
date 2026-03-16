@@ -1,6 +1,5 @@
 //==============================================================================
 // PHANTASY QUEENY - Pause Menu System
-// Hovering menu box on right side
 // Music continues from overworld, only SFX play
 //==============================================================================
 
@@ -8,16 +7,14 @@
 #include <string.h>
 #include <stdio.h>
 #include "game.h"
-#include "audio.h"  // ADD THIS
+#include "audio.h"
 
-// Menu state
 static PauseMenuOption currentSelection = MENU_PARTY;
 static u16 prevJoyState = 0;
 static bool inSubMenu = false;
 static u8 subMenuSelection = 0;
-static bool firstInit = true;  // Track first time opening
+static bool firstInit = true;
 
-// Menu labels
 static const char* menuLabels[MENU_COUNT] = {
     "PARTY",
     "INV",
@@ -26,11 +23,6 @@ static const char* menuLabels[MENU_COUNT] = {
     "OPT",
     "SAVE"
 };
-
-// Forward declarations
-static void clearSubMenuArea(void);
-static void openSubMenu(PauseMenuOption option);
-static void closeSubMenu(void);
 
 static void clearSubMenuArea(void) {
     for(u8 y = 8; y <= 20; y++) {
@@ -47,7 +39,6 @@ static void closeSubMenu(void) {
 static void openSubMenu(PauseMenuOption option) {
     inSubMenu = true;
     subMenuSelection = 0;
-
     clearSubMenuArea();
 
     VDP_drawText("+------------------+", 2, 8);
@@ -108,9 +99,8 @@ void initPauseMenu(void) {
     prevJoyState = 0;
     inSubMenu = false;
 
-    // Play SFX when opening pause menu (but DON'T stop music!)
     if (firstInit) {
-        playSFX(SFX_MENU_SELECT);  // Opening sound
+        playSFX(SFX_MENU_SELECT);
         firstInit = false;
     }
 
@@ -131,33 +121,29 @@ void updatePauseMenu(void) {
     u16 joyState = JOY_readJoypad(JOY_1);
     u16 pressed = joyState & ~prevJoyState;
 
-    // Close menu with B or START
     if (pressed & (BUTTON_START | BUTTON_B)) {
-        playSFX(SFX_MENU_CANCEL);  // Cancel sound
-        firstInit = true;  // Reset for next time
+        playSFX(SFX_MENU_CANCEL);
+        firstInit = true;
         changeState(STATE_OVERWORLD);
         return;
     }
 
-    // Sub-menu navigation
     if (inSubMenu) {
         if (pressed & BUTTON_C) {
-            playSFX(SFX_MENU_CANCEL);  // Back sound
+            playSFX(SFX_MENU_CANCEL);
             closeSubMenu();
         }
         else if (pressed & BUTTON_A && currentSelection == MENU_SAVE) {
-            playSFX(SFX_MENU_SELECT);  // Confirm sound
+            playSFX(SFX_MENU_SELECT);
             VDP_drawText("SAVED!", 10, 18);
         }
         prevJoyState = joyState;
         return;
     }
 
-    // Menu movement - UP
     if (pressed & BUTTON_UP) {
         if (currentSelection > 0) {
-            playSFX(SFX_MENU_MOVE);  // Movement sound
-            
+            playSFX(SFX_MENU_MOVE);
             VDP_drawText(" ", 29, 8 + currentSelection);
             VDP_drawText(" ", 28, 8 + currentSelection);
             currentSelection--;
@@ -165,11 +151,9 @@ void updatePauseMenu(void) {
         }
     }
 
-    // Menu movement - DOWN
     if (pressed & BUTTON_DOWN) {
         if (currentSelection < MENU_COUNT - 1) {
-            playSFX(SFX_MENU_MOVE);  // Movement sound
-            
+            playSFX(SFX_MENU_MOVE);
             VDP_drawText(" ", 29, 8 + currentSelection);
             VDP_drawText(" ", 28, 8 + currentSelection);
             currentSelection++;
@@ -177,9 +161,8 @@ void updatePauseMenu(void) {
         }
     }
 
-    // Select item
     if (pressed & BUTTON_A) {
-        playSFX(SFX_MENU_SELECT);  // Selection sound
+        playSFX(SFX_MENU_SELECT);
         VDP_drawText("*", 28, 8 + currentSelection);
         openSubMenu(currentSelection);
     }
@@ -194,5 +177,4 @@ void cleanupPauseMenu(void) {
     VDP_clearText(2, 26, 25);
     VDP_clearText(15, 15, 6);
     clearSubMenuArea();
-    // Note: We don't reset firstInit here - it's reset when menu opens
 }
