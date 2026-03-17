@@ -1,5 +1,7 @@
 //==============================================================================
 // PHANTASY QUEENY - Audio System
+// 4 PSG channels: 0=Melody, 1=Bass, 2=Music Drum, 3=SFX Only
+// All channels play simultaneously at different volumes
 //==============================================================================
 
 #include "audio.h"
@@ -11,7 +13,7 @@ static bool musicPlaying = FALSE;
 static MusicTrack currentTrack = MUSIC_TITLE;
 static u8 sfxTimer = 0;
 
-// Note frequencies (NTSC PSG)
+// Note frequencies
 #define NOTE_A2  812
 #define NOTE_B2  724
 #define NOTE_C3  684
@@ -35,7 +37,13 @@ static u8 sfxTimer = 0;
 #define NOTE_G5  114
 #define NOTE_REST 0
 
-// --- MUSIC DATA ---
+// Volume levels (0=full, 15=silence)
+#define VOL_MUSIC_MELODY  4    // Quiet melody
+#define VOL_MUSIC_BASS    6    // Quieter bass
+#define VOL_MUSIC_DRUM    8    // Quiet drums
+#define VOL_SFX           2    // Loud SFX (lower number = louder)
+
+// Music data
 static const u16 titleMelody[] = {
     NOTE_D4, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_G4, NOTE_F4, NOTE_E4, NOTE_D4,
     NOTE_C4, NOTE_D4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_D4, NOTE_REST, NOTE_REST
@@ -75,7 +83,6 @@ void initAudio(void) {
 }
 
 void playMusic(MusicTrack track) {
-    stopMusic();
     currentTrack = track;
     musicStep = 0;
     musicTimer = 0;
@@ -99,53 +106,54 @@ void resumeMusic(void) {
 }
 
 void playSFX(SoundEffect sfx) {
-    sfxTimer = 15;
+    sfxTimer = 20;  // SFX duration (longer for audibility)
     
     switch(sfx) {
         case SFX_MENU_MOVE:
             PSG_setTone(3, NOTE_E4);
-            PSG_setEnvelope(3, 8);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_MENU_SELECT:
             PSG_setTone(3, NOTE_A4);
-            PSG_setEnvelope(3, 6);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_MENU_CANCEL:
             PSG_setTone(3, NOTE_C4);
-            PSG_setEnvelope(3, 8);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_PORTAL_HUM:
-            PSG_setTone(3, NOTE_G4);
-            PSG_setEnvelope(3, 10);
+            PSG_setTone(3, NOTE_G3);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_COMBAT_START:
             PSG_setTone(3, NOTE_E4);
-            PSG_setEnvelope(3, 6);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_ATTACK:
             PSG_setTone(3, NOTE_A3);
-            PSG_setEnvelope(3, 8);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_MAGIC:
             PSG_setTone(3, NOTE_C5);
-            PSG_setEnvelope(3, 6);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_DAMAGE:
             PSG_setTone(3, NOTE_E3);
-            PSG_setEnvelope(3, 10);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         case SFX_VICTORY:
             PSG_setTone(3, NOTE_C5);
-            PSG_setEnvelope(3, 6);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
         default:
             PSG_setTone(3, NOTE_A4);
-            PSG_setEnvelope(3, 8);
+            PSG_setEnvelope(3, VOL_SFX);
             break;
     }
 }
 
 void updateAudio(void) {
+    // Handle SFX timeout
     if (sfxTimer > 0) {
         sfxTimer--;
         if (sfxTimer == 0) {
@@ -153,6 +161,7 @@ void updateAudio(void) {
         }
     }
     
+    // Music sequencer - channels 0, 1, 2
     if (!musicPlaying) return;
     if (currentTrack > MUSIC_COMBAT) return;
     
@@ -162,20 +171,22 @@ void updateAudio(void) {
     if (musicTimer < track->tempo) return;
     musicTimer = 0;
     
+    // Channel 0: Melody (quiet)
     u16 note = track->melody[musicStep];
     PSG_setTone(0, note);
-    if (note != NOTE_REST) {
-        PSG_setEnvelope(0, 0);
-    } else {
-        PSG_setEnvelope(0, 15);
-    }
+    PSG_setEnvelope(0, (note == NOTE_REST) ? 15 : VOL_MUSIC_MELODY);
     
+    // Channel 1: Bass (quieter)
     u16 bass = track->counter[musicStep];
     PSG_setTone(1, bass);
-    if (bass != NOTE_REST) {
-        PSG_setEnvelope(1, 2);
+    PSG_setEnvelope(1, (bass == NOTE_REST) ? 15 : VOL_MUSIC_BASS);
+    
+    // Channel 2: Simple drum on beat
+    if ((musicStep % 4) == 0) {
+        PSG_setTone(2, NOTE_A2);
+        PSG_setEnvelope(2, VOL_MUSIC_DRUM);
     } else {
-        PSG_setEnvelope(1, 15);
+        PSG_setEnvelope(2, 15);  // Silence
     }
     
     musicStep++;
